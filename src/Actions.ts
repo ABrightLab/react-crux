@@ -3,7 +3,7 @@ import { FetchUtil } from "./FetchUtil"
 
 const queryString = require("query-string")
 
-const apiServer = process.env.API_SERVER || ""
+const apiServer = "https://api-dev.abrightlab.com/masterdata/v2"
 
 export function getMyDetails(success?: any, error?: any) {
     return (dispatch: Dispatch<any>) => {
@@ -28,7 +28,7 @@ export function filterModel(model: string, item: any, success?: any, error?: any
         dispatch({ type: "FETCH_" + model + "_STARTED", model: model, item: item, isFilters: true })
         const modalQueryParams = queryString.parseUrl(model)
         const queryParamsString = queryString.stringify(Object.assign({}, modalQueryParams.query, queryParams))
-        fetch(`${apiServer}/model/${modalQueryParams.url}/filter?${queryParamsString}`, FetchUtil.post(item)).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(`${apiServer}/${modalQueryParams.url}/filter?${queryParamsString}`, FetchUtil.post(item)).then(FetchUtil.parseResponse).then((data: any) => {
             dispatch({ type: "FETCH_" + model + "_COMPLETED", data: { results: data.results ? data.results : data, metadata: data.metadata }, model: model })
             if (success) success(data.results ? data.results : data)
         }).catch((err: any) => {
@@ -48,7 +48,7 @@ export function fetchModel(model: string, success?: any, error?: any, queryParam
         dispatch({ type: "FETCH_" + model + "_STARTED", model: model })
         const modalQueryParams = queryString.parseUrl(model)
         const queryParamsString = queryString.stringify(Object.assign({}, modalQueryParams.query, queryParams))
-        fetch(`${apiServer}/model/${modalQueryParams.url}?${queryParamsString}`, FetchUtil.get()).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(`${apiServer}/${modalQueryParams.url}?${queryParamsString}`, FetchUtil.get()).then(FetchUtil.parseResponse).then((data: any) => {
             dispatch({ type: "FETCH_" + model + "_COMPLETED", data: data.results ? data.results : data, model: model })
             if (success) success(data)
         }).catch((err: any) => {
@@ -66,7 +66,7 @@ export function fetchModel(model: string, success?: any, error?: any, queryParam
 export function bulkCreate(model: string, csvUrl: string, success?: any, error?: any) {
     return (dispatch: Dispatch<any>) => {
         dispatch({ type: "BULK_CREATE_" + model + "_STARTED", model: model })
-        fetch("/model/" + model + "/bulkCreate", FetchUtil.post({ csvUrl: csvUrl })).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(apiServer+"/" + model + "/bulkCreate", FetchUtil.post({ csvUrl: csvUrl })).then(FetchUtil.parseResponse).then((data: any) => {
             dispatch({ type: "BULK_CREATE_" + model + "_COMPLETED", data: data, model: model })
             if (success) success(data)
         }).catch((err: any) => {
@@ -81,7 +81,7 @@ export function bulkCreate(model: string, csvUrl: string, success?: any, error?:
 
 export function searchModel(model: string, id: string, callback: any) {
     return (dispatch: Dispatch<any>) => {
-        fetch(`${apiServer}/model/${model}/${id}`, FetchUtil.get()).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(`${apiServer}/${model}/${id}`, FetchUtil.get()).then(FetchUtil.parseResponse).then((data: any) => {
             if (callback) callback(data)
         }).catch((err: any) => {
             if (err.name === "AuthError") {
@@ -99,7 +99,7 @@ export function createOrModify(model: string, item: any, edit: boolean, success?
         dispatch({ type: word + "_" + model + "_STARTED", model: model })
         const modalQueryParams = queryString.parseUrl(model)
         const queryParamsString = queryString.stringify(Object.assign({}, modalQueryParams.query, queryParams))
-        fetch(`${apiServer}/model/${modalQueryParams.url}?${queryParamsString}`, edit ? FetchUtil.put(item) : FetchUtil.post(item)).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(`${apiServer}/${modalQueryParams.url}?${queryParamsString}`, edit ? FetchUtil.put(item) : FetchUtil.post(item)).then(FetchUtil.parseResponse).then((data: any) => {
             dispatch({ type: word + "_" + model + "_COMPLETED", data: data, model: model })
             if (success) success(data)
         }).catch((err: any) => {
@@ -119,7 +119,7 @@ export function deleteModel(model: string, item: any, success?: any, error?: any
         dispatch({ type: "DELETE_" + model + "_STARTED", model: model })
         const modalQueryParams = queryString.parseUrl(model)
         const queryParamsString = queryString.stringify(Object.assign({}, modalQueryParams.query, queryParams))
-        fetch(`${apiServer}/model/${modalQueryParams.url}?${queryParamsString}`, FetchUtil.delete(item)).then(FetchUtil.parseResponse).then((data: any) => {
+        fetch(`${apiServer}/${modalQueryParams.url}?${queryParamsString}`, FetchUtil.delete(item)).then(FetchUtil.parseResponse).then((data: any) => {
             dispatch({ type: "DELETE_" + model + "_COMPLETED", data: data, model: model })
             if (success) success(data)
         }).catch((err: any) => {
@@ -154,7 +154,7 @@ export function failureCustomModal(err: any, model: string, type: string) {
 
 export const fetchDynamicTypeaheadResults = async (model: string, item: any) => {
     try {
-        const response = await fetch(`/model/${model}/filter`, FetchUtil.post(item))
+        const response = await fetch(`${apiServer}/${model}/filter`, FetchUtil.post(item))
         return FetchUtil.parseResponse(response)
     }
     catch (err) {
